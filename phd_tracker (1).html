@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhD Tracker — Hạnh Uyên</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=DM+Mono:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0d0f14;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #eeeae2;
+  --text2: #9a9589;
+  --text3: #5a5650;
+  --teal: #4ecfaa;
+  --teal2: rgba(78,207,170,0.12);
+  --amber: #e8a842;
+  --amber2: rgba(232,168,66,0.12);
+  --blue: #6aaee8;
+  --blue2: rgba(106,174,232,0.12);
+  --coral: #e8765a;
+  --coral2: rgba(232,118,90,0.12);
+  --purple: #a98ef5;
+  --purple2: rgba(169,142,245,0.12);
+  --sidebar: 200px;
+}
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  font-size: 13px;
+}
+
+/* WAVE CANVAS */
+#wave-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.18;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  z-index: 10;
+  background: rgba(13,15,20,0.92);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  padding: 0 14px 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+
+.logo-mark {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--teal);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 4px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav { padding: 0 8px; flex: 1; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 400;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 1px;
+}
+
+.nav-item:hover { color: var(--text); background: var(--surface); }
+.nav-item.active { color: var(--text); background: var(--surface2); }
+
+.nav-pip {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.nav-item.active .nav-pip { opacity: 1; }
+
+/* MAIN */
+.main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  padding: 32px 36px;
+  max-width: 780px;
+  position: relative;
+  z-index: 1;
+}
+
+/* PAGE */
+.page { display: none; animation: fadeIn 0.25s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+
+.page-top {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.page-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.card-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  margin-bottom: 12px;
+}
+
+/* SKILL GRID */
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.skill-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 10px 8px;
+}
+
+.skill-name { font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.skill-input {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.skill-input::placeholder { color: var(--text3); }
+.skill-target { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.overall-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.overall-label { font-size: 11px; color: var(--text2); }
+.overall-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--teal);
+}
+
+/* PROGRESS */
+.prog-row { margin-bottom: 10px; }
+.prog-head { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+.prog-head span { color: var(--text2); }
+.prog-head em { color: var(--text3); font-style: normal; font-family: 'DM Mono', monospace; }
+.prog-bar { height: 3px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+/* CHECKLIST */
+.checklist { list-style: none; }
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item.done { opacity: 0.4; }
+
+.cb {
+  width: 14px; height: 14px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  color: var(--bg);
+  transition: all 0.15s;
+  background: none;
+}
+
+.check-item.done .cb {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+
+.check-text { font-size: 12px; color: var(--text2); }
+.check-item.done .check-text { text-decoration: line-through; }
+
+/* CHAPTER ROWS */
+.ch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.ch-row:last-child { border-bottom: none; }
+.ch-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); min-width: 36px; }
+.ch-name { font-size: 12px; color: var(--text2); flex: 1; }
+.ch-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* SCHEDULE TABLE */
+.sch-table { width: 100%; border-collapse: collapse; }
+.sch-table tr { border-bottom: 1px solid var(--border); }
+.sch-table tr:last-child { border-bottom: none; }
+.sch-table td { padding: 6px 4px; font-size: 12px; vertical-align: top; }
+.sch-table td:first-child { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 10px; min-width: 90px; padding-top: 8px; }
+
+.pill {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* NOTE */
+.note {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+}
+.note:focus { border-color: var(--border2); }
+.note::placeholder { color: var(--text3); }
+
+/* STAT ROW */
+.stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 10px; }
+.stat { background: var(--surface2); border-radius: 6px; padding: 10px; text-align: center; }
+.stat-n { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; }
+.stat-l { font-size: 10px; color: var(--text3); margin-top: 2px; letter-spacing: 0.04em; }
+
+/* PAPER NOTE */
+.paper-callout {
+  border-left: 2px solid var(--amber);
+  background: var(--amber2);
+  border-radius: 0 5px 5px 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.section-gap { margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<canvas id="wave-canvas"></canvas>
+
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">BHU</div>
+    <div class="logo-sub">PhD Tracker</div>
+  </div>
+  <div class="nav">
+    <button class="nav-item active" onclick="nav(this,'ielts')">
+      <span class="nav-pip" style="background:#6aaee8"></span> IELTS
+    </button>
+    <button class="nav-item" onclick="nav(this,'math')">
+      <span class="nav-pip" style="background:#a98ef5"></span> Toán
+    </button>
+    <button class="nav-item" onclick="nav(this,'research')">
+      <span class="nav-pip" style="background:#4ecfaa"></span> Research
+    </button>
+    <button class="nav-item" onclick="nav(this,'schedule')">
+      <span class="nav-pip" style="background:#e8a842"></span> Lịch tuần
+    </button>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- IELTS -->
+<div id="p-ielts" class="page active">
+  <div class="page-top">
+    <div>
+      <div class="page-title">IELTS</div>
+      <div class="page-sub">Mục tiêu band 6.5+ · 3–5 tháng</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Điểm mock test</div>
+    <div class="skill-grid">
+      <div class="skill-box">
+        <div class="skill-name">Listening</div>
+        <input class="skill-input" type="number" min="1" max="9" step="0.5" placeholder="—" oninput="calcBand()" id="s-L">
+        <div class="skill-target">target 6.5</div>
+      </div>
+      <div class="skill-box">
+        <div class="skill-name">Reading</div>
+        <input class="skill-input" type="number" min="1" max="9" step="0.5" placeholder="—" oninput="calcBand()" id="s-R">
+        <div class="skill-target">target 6.5</div>
+      </div>
+      <div class="skill-box" style="border-color:rgba(232,118,90,0.25)">
+        <div class="skill-name" style="color:var(--coral)">Writing ⚠</div>
+        <input class="skill-input" type="number" min="1" max="9" step="0.5" placeholder="—" oninput="calcBand()" id="s-W">
+        <div class="skill-target" style="color:var(--coral)">cần chú ý</div>
+      </div>
+      <div class="skill-box" style="border-color:rgba(232,118,90,0.25)">
+        <div class="skill-name" style="color:var(--coral)">Speaking ⚠</div>
+        <input class="skill-input" type="number" min="1" max="9" step="0.5" placeholder="—" oninput="calcBand()" id="s-S">
+        <div class="skill-target" style="color:var(--coral)">cần chú ý</div>
+      </div>
+    </div>
+    <div class="overall-row">
+      <span class="overall-label">Overall band</span>
+      <span class="overall-val" id="overall">—</span>
+    </div>
+    <div class="prog-row">
+      <div class="prog-head"><span>Tiến độ về mục tiêu</span><em id="prog-txt">0 / 4 skills đạt 6.5</em></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%;background:var(--teal)"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Checklist tuần này</div>
+    <ul class="checklist">
+      <li class="check-item" onclick="tick(this)"><span class="cb"></span><span class="check-text">Nghe BBC/podcast mỗi ngày di chuyển</span></li>
+      <li class="check-item" onclick="tick(this)"><span class="cb"></span><span class="check-text">IELTS Reading — 1 passage</span></li>
+      <li class="check-item" onclick="tick(this)"><span class="cb"></span><span class="check-text">IELTS Writing Task 2 — 1 bài</span></li>
+      <li class="check-item" onclick="tick(this)"><span class="cb"></span><span class="check-text">Học lớp Speaking với thầy (Thứ 4)</span></li>
+      <li class="check-item" onclick="tick(this)"><span class="cb"></span><span class="check-text">Học lớp với thầy (Thứ 6)</span></li>
+      <li class="check-item" onclick="tick(this)"><span class="cb"></span><span class="check-text">Review vocabulary — 20 từ</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Ghi chú / Feedback từ thầy</div>
+    <textarea class="note" placeholder="Lỗi thường gặp, từ vựng cần nhớ, điểm cần cải thiện..."></textarea>
+  </div>
+</div>
+
+<!-- MATH -->
+<div id="p-math" class="page">
+  <div class="page-top">
+    <div>
+      <div class="page-title">Toán</div>
+      <div class="page-sub">Strogatz · Functional Analysis</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Strogatz — Nonlinear Dynamics & Chaos</div>
+    <div class="prog-row" style="margin-bottom:12px">
+      <div class="prog-head"><span>Tổng tiến độ</span><em id="strog-txt">11 / 12</em></div>
+      <div class="prog-bar"><div class="prog-fill" id="strog-bar" style="width:91.7%;background:var(--purple)"></div></div>
+    </div>
+    <div id="strog-list">
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.1–6</span><span class="ch-name">1D flows, bifurcations, phase plane</span><span class="ch-badge" style="background:var(--teal2);color:var(--teal)">Done</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.7</span><span class="ch-name">Limit cycles</span><span class="ch-badge" style="background:var(--teal2);color:var(--teal)">Done</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.8</span><span class="ch-name">Bifurcations revisited</span><span class="ch-badge" style="background:var(--teal2);color:var(--teal)">Done</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.9</span><span class="ch-name">Lorenz equations</span><span class="ch-badge" style="background:var(--teal2);color:var(--teal)">Done</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.10</span><span class="ch-name">One-dimensional maps</span><span class="ch-badge" style="background:var(--teal2);color:var(--teal)">Done</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.11</span><span class="ch-name">Fractals</span><span class="ch-badge" style="background:var(--teal2);color:var(--teal)">Done</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'strog')"><span class="ch-num">Ch.12</span><span class="ch-name">Strange attractors</span><span class="ch-badge" style="background:var(--amber2);color:var(--amber)">Next →</span></div>
+    </div>
+  </div>
+
+  <div class="card section-gap">
+    <div class="card-label">Functional Analysis — PhD level</div>
+    <div class="prog-row" style="margin-bottom:12px">
+      <div class="prog-head"><span>Tiến độ</span><em id="fa-txt">0 / 4</em></div>
+      <div class="prog-bar"><div class="prog-fill" id="fa-bar" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+    <div id="fa-list">
+      <div class="ch-row" onclick="cycleChap(this,'fa')"><span class="ch-num">01</span><span class="ch-name">Normed & Banach spaces</span><span class="ch-badge" style="background:var(--amber2);color:var(--amber)">Đang học</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'fa')"><span class="ch-num">02</span><span class="ch-name">Hilbert spaces</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'fa')"><span class="ch-num">03</span><span class="ch-name">Bounded linear operators</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'fa')"><span class="ch-num">04</span><span class="ch-name">Hahn-Banach & duality</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Ghi chú tuần này</div>
+    <textarea class="note" placeholder="Kết quả chính, bài tập khó, câu hỏi còn thắc mắc..."></textarea>
+  </div>
+</div>
+
+<!-- RESEARCH -->
+<div id="p-research" class="page">
+  <div class="page-top">
+    <div>
+      <div class="page-title">Research</div>
+      <div class="page-sub">Van Gorder 2020 · Email Prof.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Paper chính</div>
+    <div class="paper-callout">
+      Van Gorder (2020) — <em>Turing and Benjamin–Feir instability mechanisms in non-autonomous systems</em> · Proc. Royal Society A
+    </div>
+    <div class="prog-row" style="margin-bottom:12px">
+      <div class="prog-head"><span>Tiến độ đọc</span><em id="paper-txt">0 / 6 sections</em></div>
+      <div class="prog-bar"><div class="prog-fill" id="paper-bar" style="width:0%;background:var(--teal)"></div></div>
+    </div>
+    <div id="paper-list">
+      <div class="ch-row" onclick="cycleChap(this,'paper')"><span class="ch-num">§1</span><span class="ch-name">Introduction</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'paper')"><span class="ch-num">§2</span><span class="ch-name">Non-autonomous framework</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'paper')"><span class="ch-num">§3</span><span class="ch-name">Turing instability conditions</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'paper')"><span class="ch-num">§4</span><span class="ch-name">Benjamin–Feir mechanism</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'paper')"><span class="ch-num">§5</span><span class="ch-name">Examples & applications</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+      <div class="ch-row" onclick="cycleChap(this,'paper')"><span class="ch-num">§6</span><span class="ch-name">Discussion & open questions</span><span class="ch-badge" style="background:rgba(255,255,255,0.05);color:var(--text3)">Chưa</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Key ideas & connections với thesis</div>
+    <textarea class="note" style="min-height:100px" placeholder="Kết nối với time-delay systems, Lyapunov methods, câu hỏi muốn hỏi Prof. Van Gorder..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Draft email — Prof. Van Gorder</div>
+    <div class="status-tag" style="background:var(--amber2);color:var(--amber)">⏳ Chờ IELTS xong</div>
+    <textarea class="note" style="min-height:120px" placeholder="Dear Prof. Van Gorder,&#10;&#10;..."></textarea>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="p-schedule" class="page">
+  <div class="page-top">
+    <div>
+      <div class="page-title">Lịch tuần</div>
+      <div class="page-sub">Bền vững — không nhồi, không bỏ trắng</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Thứ 2 · 3 · 5 — tối tự học</div>
+    <table class="sch-table">
+      <tr><td>7h–8h30</td><td>Di chuyển <span class="pill" style="background:var(--blue2);color:var(--blue)">IELTS listening</span></td></tr>
+      <tr><td>9h–18h</td><td>Làm việc</td></tr>
+      <tr><td>19h–19h30</td><td>Ăn tối, nghỉ</td></tr>
+      <tr><td>19h30–21h</td><td>Toán <span class="pill" style="background:var(--purple2);color:var(--purple)">Strogatz / FA / Paper</span> luân phiên</td></tr>
+      <tr><td>21h–21h30</td><td><span class="pill" style="background:var(--blue2);color:var(--blue)">IELTS reading</span> hoặc vocab</td></tr>
+      <tr><td>21h30+</td><td>Nghỉ — ngủ trước 23h</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Thứ 4 · 6 — có lớp 8h tối</div>
+    <table class="sch-table">
+      <tr><td>7h–8h30</td><td>Di chuyển <span class="pill" style="background:var(--blue2);color:var(--blue)">IELTS listening</span></td></tr>
+      <tr><td>9h–18h</td><td>Làm việc</td></tr>
+      <tr><td>19h–20h</td><td>Nghỉ hoàn toàn, ăn tối</td></tr>
+      <tr><td>20h–21h30</td><td><span class="pill" style="background:var(--blue2);color:var(--blue)">IELTS với thầy</span></td></tr>
+      <tr><td>21h30+</td><td>Nghỉ — không nhồi thêm</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Thứ 7 — toán + research</div>
+    <table class="sch-table">
+      <tr><td>Sáng 2–3h</td><td><span class="pill" style="background:var(--purple2);color:var(--purple)">Toán sâu</span> Strogatz hoặc FA</td></tr>
+      <tr><td>Chiều 1–2h</td><td><span class="pill" style="background:var(--teal2);color:var(--teal)">Research</span> Paper / draft email</td></tr>
+      <tr><td>Tối</td><td>Tự do — nghỉ thật sự</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Chủ nhật — nhẹ nhàng</div>
+    <table class="sch-table">
+      <tr><td>Sáng</td><td>Ngủ tự nhiên — không đặt báo thức</td></tr>
+      <tr><td>Chiều 1–1h30</td><td><span class="pill" style="background:var(--blue2);color:var(--blue)">IELTS writing/speaking</span> luyện nhẹ</td></tr>
+      <tr><td>Còn lại</td><td>Đi dạo, đọc nhẹ, nạp năng lượng</td></tr>
+    </table>
+  </div>
+
+  <div style="border-left:2px solid var(--purple);background:var(--purple2);border-radius:0 6px 6px 0;padding:10px 14px;font-size:11px;color:var(--text2);line-height:1.6;">
+    Luân phiên tối Thứ 2/3/5 · <strong style="color:var(--text)">Thứ 2</strong> → Strogatz · <strong style="color:var(--text)">Thứ 3</strong> → Functional Analysis · <strong style="color:var(--text)">Thứ 5</strong> → Paper Van Gorder
+  </div>
+</div>
+
+</main>
+
+<script>
+// NAV
+function nav(btn, id) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('p-' + id).classList.add('active');
+}
+
+// CHECKBOX
+function tick(el) {
+  el.classList.toggle('done');
+  el.querySelector('.cb').textContent = el.classList.contains('done') ? '✓' : '';
+}
+
+// CHAPTER CYCLE
+const states = [
+  { text: 'Chưa', bg: 'rgba(255,255,255,0.05)', col: 'var(--text3)' },
+  { text: 'Đang học', bg: 'var(--amber2)', col: 'var(--amber)' },
+  { text: 'Done', bg: 'var(--teal2)', col: 'var(--teal)' },
+];
+
+function cycleChap(row, group) {
+  const badge = row.querySelector('.ch-badge');
+  const cur = states.findIndex(s => badge.textContent.trim() === s.text || badge.textContent.includes(s.text));
+  const next = states[(cur + 1) % states.length];
+  badge.textContent = next.text;
+  badge.style.background = next.bg;
+  badge.style.color = next.col;
+  updateBar(group);
+}
+
+function updateBar(group) {
+  const map = {
+    strog: { list:'strog-list', bar:'strog-bar', txt:'strog-txt' },
+    fa:    { list:'fa-list',    bar:'fa-bar',    txt:'fa-txt'   },
+    paper: { list:'paper-list', bar:'paper-bar', txt:'paper-txt'},
+  };
+  const m = map[group];
+  const rows = document.querySelectorAll('#' + m.list + ' .ch-row');
+  const done = [...rows].filter(r => r.querySelector('.ch-badge').textContent === 'Done').length;
+  const pct = rows.length ? (done / rows.length * 100) : 0;
+  document.getElementById(m.bar).style.width = pct + '%';
+  document.getElementById(m.txt).textContent = done + ' / ' + rows.length;
+}
+
+// BAND CALC
+function calcBand() {
+  const ids = ['s-L','s-R','s-W','s-S'];
+  const vals = ids.map(id => parseFloat(document.getElementById(id).value)).filter(v => !isNaN(v));
+  const reached = vals.filter(v => v >= 6.5).length;
+  document.getElementById('prog-fill').style.width = (reached / 4 * 100) + '%';
+  document.getElementById('prog-txt').textContent = reached + ' / 4 skills đạt 6.5';
+  if (vals.length === 4) {
+    const avg = vals.reduce((a,b) => a+b) / 4;
+    const band = Math.round(avg * 2) / 2;
+    const el = document.getElementById('overall');
+    el.textContent = band.toFixed(1);
+    el.style.color = band >= 6.5 ? 'var(--teal)' : band >= 6.0 ? 'var(--amber)' : 'var(--coral)';
+  }
+}
+
+// WAVE — reaction-diffusion inspired
+const canvas = document.getElementById('wave-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  t += 0.008;
+
+  // Multiple superposed waves — Turing-inspired spatial patterns
+  const waves = [
+    { k: 0.018, f: 0.6, a: 28, phase: 0,      col: '78,207,170'  },
+    { k: 0.012, f: 0.4, a: 18, phase: 1.8,    col: '169,142,245' },
+    { k: 0.025, f: 0.9, a: 12, phase: 3.5,    col: '106,174,232' },
+  ];
+
+  waves.forEach(w => {
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(${w.col}, 0.6)`;
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x <= W; x += 2) {
+      // Nonlinear superposition — feels like a real dynamical system
+      const y = H * 0.5
+        + w.a * Math.sin(w.k * x + w.f * t + w.phase)
+        + (w.a * 0.4) * Math.sin(w.k * 2.3 * x - w.f * 0.7 * t + w.phase + 1)
+        + (w.a * 0.2) * Math.sin(w.k * 0.5 * x + w.f * 1.3 * t + w.phase + 2.2);
+
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  });
+
+  // Faint horizontal reference lines
+  for (let i = 1; i < 4; i++) {
+    const y = H * (i / 4);
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+    ctx.lineWidth = 0.5;
+    ctx.moveTo(0, y); ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
